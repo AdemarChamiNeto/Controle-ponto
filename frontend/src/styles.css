@@ -23,3 +23,4 @@ tfoot td { font-weight: 600; }
 .muted { color: #6b7280; }
 .tag { display: inline-block; font-size: .8rem; background: #fef3c7; color: #92400e; border-radius: 6px; padding: 2px 8px; margin: 2px; }
 tr.falta .tag { background: #fee2e2; color: #991b1b; }
+.docs-link { text-align: center; font-size: .85rem; color: #6b7280; }

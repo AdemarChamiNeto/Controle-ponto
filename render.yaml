@@ -1,0 +1,13 @@
+# Blueprint do Render: New + → Blueprint → escolha este repositório.
+services:
+  - type: web
+    name: controle-ponto
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # cole a connection string do Neon (com ?sslmode=require)
+      - key: JWT_SECRET
+        generateValue: true

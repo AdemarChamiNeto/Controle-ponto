@@ -36,6 +36,7 @@ export default function Login() {
       <button type="button" className="link" onClick={() => setMode(mode === "login" ? "register" : "login")}>
         {mode === "login" ? "Não tenho conta" : "Já tenho conta"}
       </button>
+      <a className="docs-link" href="/api/docs/" target="_blank" rel="noreferrer">Documentação da API (Swagger)</a>
     </form>
   );
 }

@@ -129,3 +129,35 @@ test("atualiza a jornada diária dentro dos limites", { skip }, async () => {
   assert.equal((await call("/auth/me", { method: "PUT", token, body: { dailyMinutes: 360 } })).json.dailyMinutes, 360);
   assert.equal((await call("/auth/me", { method: "PUT", token, body: { dailyMinutes: 30 } })).status, 400);
 });
+
+test("documentação OpenAPI cobre as rotas e o Swagger UI abre", { skip }, async () => {
+  const spec = await call("/docs.json");
+  assert.equal(spec.status, 200);
+  for (const route of ["/auth/register", "/auth/login", "/auth/me", "/punches", "/punches/{id}", "/punches/report", "/punches/report.csv", "/punches/report.xml"]) {
+    assert.ok(spec.json.paths[route], `rota ${route} sem documentação`);
+  }
+  const ui = await fetch(base + "/docs/");
+  assert.equal(ui.status, 200);
+  assert.match(await ui.text(), /swagger-ui/i);
+});
+
+test("rota inexistente da API responde 404 em JSON", { skip }, async () => {
+  const r = await call("/nao-existe");
+  assert.equal(r.status, 404);
+  assert.equal(r.json.error, "Rota não encontrada");
+});
+
+test("limita tentativas de login (força bruta)", { skip }, async () => {
+  const { createApp } = await import("./app.js");
+  process.env.AUTH_RATE_LIMIT = "3";
+  const limited = createApp().listen(0);
+  delete process.env.AUTH_RATE_LIMIT;
+  const url = `http://127.0.0.1:${(limited.address() as AddressInfo).port}/api/auth/login`;
+  const statuses: number[] = [];
+  for (let i = 0; i < 4; i++) {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: "x@x.com", password: "errada123" }) });
+    statuses.push(r.status);
+  }
+  limited.close();
+  assert.deepEqual(statuses, [401, 401, 401, 429]);
+});

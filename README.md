@@ -2,7 +2,9 @@
 
 Sistema pessoal de registro de ponto. Você bate o ponto, vê o espelho do mês com horas trabalhadas, saldo, faltas e feriados, e exporta o mês em CSV ou XML.
 
-**Stack:** React 18 + TypeScript + Vite · Redux Toolkit + RTK Query · Node.js + Express 5 + TypeScript · PostgreSQL · JWT · BrasilAPI (webservice de feriados) · Docker Compose · GitHub Actions
+**Stack:** React 18 + TypeScript + Vite · Redux Toolkit + RTK Query · Node.js + Express 5 + TypeScript · PostgreSQL · JWT · OpenAPI/Swagger · BrasilAPI (webservice de feriados) · Docker · GitHub Actions
+
+**Demo:** `https://SEU-APP.onrender.com` · **Documentação da API:** `https://SEU-APP.onrender.com/api/docs`
 
 ## Funcionalidades
 
@@ -12,6 +14,8 @@ Sistema pessoal de registro de ponto. Você bate o ponto, vê o espelho do mês 
 - **Feriados nacionais:** vêm do webservice da [BrasilAPI](https://brasilapi.com.br/docs#tag/Feriados-Nacionais) e ficam em cache no banco, então a API externa só é chamada uma vez por ano. Trabalho em feriado ou fim de semana vira hora extra. Se a BrasilAPI estiver fora do ar, o espelho continua funcionando sem os feriados.
 - **Exportação** em CSV (abre no Excel, com BOM UTF-8) e em **XML**, para integração com outros sistemas.
 - Jornada diária configurável.
+- **Documentação interativa da API** com Swagger (OpenAPI 3) em `/api/docs`: dá para criar conta, autorizar com o token e testar cada rota pelo navegador.
+- **Segurança básica:** limite de tentativas no login e cadastro (contra força bruta), cabeçalhos HTTP de segurança (helmet), limite de tamanho do corpo da requisição e 404 em JSON para rotas inexistentes.
 
 ## Arquitetura
 
@@ -23,7 +27,8 @@ frontend/src/
     reportSlice.ts  mês selecionado
   Dashboard.tsx · Login.tsx
 backend/src/
-  app.ts            Express (separado do listen, para testar em memória)
+  app.ts            Express (separado do listen, para testar em memória) + Swagger, helmet, rate limit
+  openapi.ts        especificação OpenAPI 3 da API
   calc.ts           regras de cálculo: pares entrada/saída, saldo, faltas, feriados
   holidays.ts       cliente da BrasilAPI + cache no PostgreSQL
   xml.ts            geração do espelho em XML
@@ -55,6 +60,17 @@ npm install && npm run dev            # API em :3001
 cd frontend && npm install && npm run dev   # app em :5173 (proxy /api → :3001)
 ```
 
+## Deploy (grátis): Neon + Render
+
+A imagem do `Dockerfile` da raiz junta tudo num serviço só: a API Express também entrega o front compilado.
+
+1. **Banco:** crie um projeto no [Neon](https://neon.tech). Copie a *connection string*, que termina com `?sslmode=require`.
+2. **App:** no [Render](https://render.com), vá em **New + → Blueprint** e escolha este repositório. O `render.yaml` já configura tudo.
+3. Quando ele pedir `DATABASE_URL`, cole a string do Neon. O `JWT_SECRET` é gerado sozinho.
+4. Em alguns minutos o app sobe em `https://<nome>.onrender.com`. As tabelas são criadas na primeira subida.
+
+> No plano grátis, o Render "dorme" depois de 15 minutos sem acesso. A primeira visita depois disso demora uns 30 segundos.
+
 ## Testes
 
 ```bash
@@ -63,7 +79,7 @@ DATABASE_URL=postgres://ponto:ponto@localhost:5432/ponto npm test   # + integra�
 cd frontend && npm test    # store Redux e tratamento de erros
 ```
 
-Os testes de integração sobem o Express em memória contra um PostgreSQL real. Eles cobrem cadastro e login, rotas protegidas, espelho, CSV, XML, bloqueio de batida dupla e isolamento entre usuários. No GitHub Actions eles rodam com um container PostgreSQL a cada push.
+Os testes de integração sobem o Express em memória contra um PostgreSQL real. Eles cobrem cadastro e login, rotas protegidas, espelho, CSV, XML, bloqueio de batida dupla, isolamento entre usuários, limite de tentativas de login e se toda rota está documentada no Swagger. No GitHub Actions eles rodam com um container PostgreSQL a cada push.
 
 ## API (REST)
 
@@ -104,7 +120,6 @@ Exemplo de XML:
 
 - Edição de marcação.
 - Feriados estaduais e municipais.
-- Deploy.
 
 ## Autor
 
