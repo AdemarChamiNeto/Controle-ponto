@@ -4,7 +4,9 @@ Sistema pessoal de registro de ponto. Você bate o ponto, vê o espelho do mês 
 
 **Stack:** React 18 + TypeScript + Vite · Redux Toolkit + RTK Query · Node.js + Express 5 + TypeScript · PostgreSQL · JWT · OpenAPI/Swagger · BrasilAPI (webservice de feriados) · Docker · GitHub Actions
 
-**Demo:** `https://SEU-APP.onrender.com` · **Documentação da API:** `https://SEU-APP.onrender.com/api/docs`
+**Demo:** [controle-ponto-jvo5.onrender.com](https://controle-ponto-jvo5.onrender.com) · **Documentação da API:** [/api/docs](https://controle-ponto-jvo5.onrender.com/api/docs)
+
+> Hospedado no plano grátis do Render: se ficar parado, a primeira visita demora uns 30 segundos para "acordar".
 
 ## Funcionalidades
 
