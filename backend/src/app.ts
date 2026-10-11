@@ -3,10 +3,10 @@ import path from "node:path";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { rateLimit } from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import { openapi } from "./openapi.js";
-import { authRouter } from "./routes/auth.js";
+import { createLimits } from "./limits.js";
+import { createAuthRouter } from "./routes/auth.js";
 import { punchRouter } from "./routes/punches.js";
 
 /** Monta o app Express sem abrir porta — assim os testes de integração sobem ele em memória. */
@@ -18,15 +18,9 @@ export function createApp() {
   app.use(cors({ origin: process.env.CORS_ORIGIN ?? "http://localhost:5173" }));
   app.use(express.json({ limit: "100kb" }));
 
-  // freio contra força bruta no login/cadastro
-  const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    limit: Number(process.env.AUTH_RATE_LIMIT ?? 20),
-    standardHeaders: "draft-7",
-    legacyHeaders: false,
-    message: { error: "Muitas tentativas. Tente de novo em alguns minutos." },
-  });
-  app.use(["/api/auth/login", "/api/auth/register"], authLimiter);
+  // rate limit em toda a API: leitura e escrita por usuário (ou IP); login, cadastro e 2FA com limites próprios
+  const limits = createLimits();
+  app.use("/api", limits.read, limits.write);
 
   app.get("/api/health", (_req, res) => void res.json({ ok: true }));
   app.get("/api/docs.json", (_req, res) => void res.json(openapi));
@@ -34,7 +28,7 @@ export function createApp() {
     customSiteTitle: "Controle de Ponto — API",
     swaggerOptions: { persistAuthorization: true },
   }));
-  app.use("/api/auth", authRouter);
+  app.use("/api/auth", createAuthRouter(limits));
   app.use("/api/punches", punchRouter);
   app.use("/api", (_req, res) => void res.status(404).json({ error: "Rota não encontrada" }));
 

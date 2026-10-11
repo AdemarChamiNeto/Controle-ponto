@@ -19,6 +19,7 @@ services:
     environment:
       DATABASE_URL: postgres://ponto:ponto@db:5432/ponto
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env da raiz}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?defina TOTP_ENCRYPTION_KEY no arquivo .env da raiz}
     depends_on:
       db:
         condition: service_healthy

@@ -1,45 +1,85 @@
 import { createApi, fetchBaseQuery, type BaseQueryFn, type FetchArgs, type FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
-import { loggedOut } from "./authSlice";
-import type { AuthResponse, Report, User } from "./types";
+import type { AuthResponse, Report, TwoFactorSetup, User } from "./types";
 
-type TokenState = { auth: { token: string | null } };
+// A sessão é um cookie httpOnly que o navegador manda sozinho (mesma origem): o JS nunca vê o token.
+const rawBaseQuery = fetchBaseQuery({ baseUrl: "/api", credentials: "same-origin" });
 
-const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "/api",
-  prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as TokenState).auth.token;
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-    return headers;
-  },
-});
-
-/** Se a API responder 401 (token vencido/inválido), desloga automaticamente. */
+/** 401 numa rota de dados = sessão vencida: zera o cache e marca "ninguém logado" (o App mostra o login). */
 const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extra) => {
   const result = await rawBaseQuery(args, api, extra);
   const url = typeof args === "string" ? args : args.url;
-  if (result.error?.status === 401 && !url.startsWith("/auth/login")) api.dispatch(loggedOut());
+  if (result.error?.status === 401 && !url.startsWith("/auth/")) signedOut(api.dispatch);
   return result;
 };
+
+/** Esquece os dados do usuário anterior e deixa o `me` como null. */
+export function signedOut(dispatch: (action: any) => unknown) {
+  dispatch(pontoApi.util.resetApiState());
+  dispatch(pontoApi.util.upsertQueryData("me", undefined, null));
+}
+
+const signedIn = (dispatch: (action: any) => unknown, user: User) =>
+  dispatch(pontoApi.util.upsertQueryData("me", undefined, user));
 
 export const pontoApi = createApi({
   reducerPath: "pontoApi",
   baseQuery,
   tagTypes: ["Me", "Report"],
   endpoints: (b) => ({
+    /** Usuário logado, ou null se não há sessão. */
+    me: b.query<User | null, void>({
+      async queryFn(_arg, _api, _extra, base) {
+        const r = await base("/auth/me");
+        if (r.error?.status === 401) return { data: null };
+        return r.error ? { error: r.error } : { data: r.data as User };
+      },
+      providesTags: ["Me"],
+    }),
     login: b.mutation<AuthResponse, { email: string; password: string }>({
       query: (body) => ({ url: "/auth/login", method: "POST", body }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: null }));
+        if (data?.user) signedIn(dispatch, data.user);
+      },
+    }),
+    loginSecondFactor: b.mutation<AuthResponse, string>({
+      query: (code) => ({ url: "/auth/login/2fa", method: "POST", body: { code } }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: null }));
+        if (data?.user) signedIn(dispatch, data.user);
+      },
     }),
     register: b.mutation<AuthResponse, { name: string; email: string; password: string }>({
       query: (body) => ({ url: "/auth/register", method: "POST", body }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        const { data } = await queryFulfilled.catch(() => ({ data: null }));
+        if (data?.user) signedIn(dispatch, data.user);
+      },
     }),
-    me: b.query<User, void>({
-      query: () => "/auth/me",
-      providesTags: ["Me"],
+    logout: b.mutation<void, void>({
+      query: () => ({ url: "/auth/logout", method: "POST" }),
+      async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
+        await queryFulfilled.catch(() => {});
+        signedOut(dispatch);
+      },
     }),
     setDailyMinutes: b.mutation<User, number>({
       query: (dailyMinutes) => ({ url: "/auth/me", method: "PUT", body: { dailyMinutes } }),
       invalidatesTags: ["Me", "Report"],
     }),
+    // ---- 2FA (opcional) ----
+    setupTwoFactor: b.mutation<TwoFactorSetup, void>({
+      query: () => ({ url: "/auth/2fa/setup", method: "POST" }),
+    }),
+    enableTwoFactor: b.mutation<{ recoveryCodes: string[] }, string>({
+      query: (code) => ({ url: "/auth/2fa/enable", method: "POST", body: { code } }),
+      invalidatesTags: ["Me"],
+    }),
+    disableTwoFactor: b.mutation<void, { password: string; code: string }>({
+      query: (body) => ({ url: "/auth/2fa/disable", method: "POST", body }),
+      invalidatesTags: ["Me"],
+    }),
+    // ---- marcações ----
     report: b.query<Report, string>({
       query: (month) => `/punches/report?month=${month}`,
       providesTags: (_r, _e, month) => [{ type: "Report", id: month }, "Report"],
@@ -56,10 +96,15 @@ export const pontoApi = createApi({
 });
 
 export const {
-  useLoginMutation,
-  useRegisterMutation,
   useMeQuery,
+  useLoginMutation,
+  useLoginSecondFactorMutation,
+  useRegisterMutation,
+  useLogoutMutation,
   useSetDailyMinutesMutation,
+  useSetupTwoFactorMutation,
+  useEnableTwoFactorMutation,
+  useDisableTwoFactorMutation,
   useReportQuery,
   usePunchMutation,
   useRemovePunchMutation,

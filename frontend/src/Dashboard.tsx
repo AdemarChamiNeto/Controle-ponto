@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { downloadFile } from "./download";
 import { dateBR, fmt, time, weekday } from "./format";
-import { loggedOut, useAppDispatch, useAppSelector } from "./store";
+import TwoFactorCard from "./TwoFactorCard";
+import { useAppDispatch, useAppSelector } from "./store";
 import {
-  errorMessage, usePunchMutation, useRemovePunchMutation, useReportQuery, useSetDailyMinutesMutation,
+  errorMessage, useLogoutMutation, usePunchMutation, useRemovePunchMutation, useReportQuery, useSetDailyMinutesMutation,
 } from "./store/api";
 import { monthChanged, todayKey } from "./store/reportSlice";
 import type { Day, User } from "./store/types";
@@ -13,12 +14,12 @@ const LABELS = ["Entrada", "Saída almoço", "Volta almoço", "Saída"];
 export default function Dashboard({ user }: { user: User }) {
   const dispatch = useAppDispatch();
   const month = useAppSelector((s) => s.report.month);
-  const token = useAppSelector((s) => s.auth.token);
 
   const report = useReportQuery(month);
   const [punch, punchState] = usePunchMutation();
   const [removePunch, removeState] = useRemovePunchMutation();
   const [setDaily, dailyState] = useSetDailyMinutesMutation();
+  const [logout] = useLogoutMutation();
 
   const [manual, setManual] = useState("");
   const [hours, setHours] = useState(String(user.dailyMinutes / 60));
@@ -33,7 +34,7 @@ export default function Dashboard({ user }: { user: User }) {
   async function download(ext: "csv" | "xml") {
     setDownloadError("");
     try {
-      await downloadFile(`/punches/report.${ext}?month=${month}`, `ponto-${month}.${ext}`, token);
+      await downloadFile(`/punches/report.${ext}?month=${month}`, `ponto-${month}.${ext}`);
     } catch (e) {
       setDownloadError((e as Error).message);
     }
@@ -48,7 +49,7 @@ export default function Dashboard({ user }: { user: User }) {
     <div className="wrap">
       <header>
         <h1>Olá, {user.name.split(" ")[0]}</h1>
-        <button className="link" onClick={() => dispatch(loggedOut())}>Sair</button>
+        <button className="link" onClick={() => logout()}>Sair</button>
       </header>
 
       <section className="card">
@@ -106,6 +107,8 @@ export default function Dashboard({ user }: { user: User }) {
           )}
         </table>
       </section>
+
+      <TwoFactorCard enabled={user.twoFactorEnabled} />
     </div>
   );
 }

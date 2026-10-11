@@ -11,5 +11,7 @@ export type Day = {
   complete: boolean;
 };
 export type Report = { days: Day[]; totalWorked: number; totalBalance: number };
-export type User = { id: number; name: string; email: string; dailyMinutes: number };
-export type AuthResponse = { token: string; user: User };
+export type User = { id: number; name: string; email: string; dailyMinutes: number; twoFactorEnabled: boolean };
+/** Sem 2FA: já vem o usuário (sessão no cookie). Com 2FA: só `twoFactorRequired`, e o login continua em /auth/login/2fa. */
+export type AuthResponse = { user?: User; twoFactorRequired?: boolean };
+export type TwoFactorSetup = { secret: string; otpauthUrl: string };

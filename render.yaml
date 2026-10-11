@@ -11,3 +11,5 @@ services:
         sync: false # cole a connection string do Neon (com ?sslmode=require)
       - key: JWT_SECRET
         generateValue: true
+      - key: TOTP_ENCRYPTION_KEY # criptografa o segredo do 2FA no banco (32 bytes aleatórios)
+        generateValue: true

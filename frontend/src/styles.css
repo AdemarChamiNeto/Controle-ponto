@@ -24,3 +24,9 @@ tfoot td { font-weight: 600; }
 .tag { display: inline-block; font-size: .8rem; background: #fef3c7; color: #92400e; border-radius: 6px; padding: 2px 8px; margin: 2px; }
 tr.falta .tag { background: #fee2e2; color: #991b1b; }
 .docs-link { text-align: center; font-size: .85rem; color: #6b7280; }
+h2 { font-size: 1.05rem; margin: 0 0 8px; }
+.stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.stack input { width: 100%; max-width: 280px; box-sizing: border-box; }
+.codes { display: grid; grid-template-columns: repeat(2, max-content); gap: 6px 24px; padding: 0; list-style: none; }
+.secret { word-spacing: 4px; }
+.tag.ok { background: #dcfce7; color: #166534; }
