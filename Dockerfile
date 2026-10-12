@@ -3,6 +3,10 @@
 
 FROM node:20-alpine AS front
 WORKDIR /front
+# IDs públicos do GA4 e do Clarity (opcionais). No Render, as variáveis de ambiente chegam aqui como build args.
+ARG VITE_GA_ID=""
+ARG VITE_CLARITY_ID=""
+ENV VITE_GA_ID=$VITE_GA_ID VITE_CLARITY_ID=$VITE_CLARITY_ID
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend/ ./

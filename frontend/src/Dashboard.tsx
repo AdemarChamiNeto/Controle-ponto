@@ -46,7 +46,7 @@ export default function Dashboard({ user }: { user: User }) {
   }
 
   return (
-    <div className="wrap">
+    <div className="wrap" data-clarity-mask="True">{/* Clarity: nome e espelho de ponto não vão para a gravação */}
       <header>
         <h1>Olá, {user.name.split(" ")[0]}</h1>
         <button className="link" onClick={() => logout()}>Sair</button>
@@ -109,6 +109,7 @@ export default function Dashboard({ user }: { user: User }) {
       </section>
 
       <TwoFactorCard enabled={user.twoFactorEnabled} />
+      <p className="docs-link"><a href="/privacidade.html">Privacidade</a> · <a href="/api/docs/">Documentação da API</a></p>
     </div>
   );
 }

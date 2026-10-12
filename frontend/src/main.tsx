@@ -4,6 +4,7 @@ import { Provider } from "react-redux";
 import App from "./App";
 import { store } from "./store";
 import "./styles.css";
+import { initConsent } from "./consent";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -12,3 +13,6 @@ createRoot(document.getElementById("root")!).render(
     </Provider>
   </React.StrictMode>,
 );
+
+// GA4/Clarity só depois do aceite (e só se os IDs estiverem configurados no build)
+initConsent("/privacidade.html");

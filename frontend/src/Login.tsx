@@ -55,6 +55,7 @@ export default function Login() {
         {mode === "login" ? "Não tenho conta" : "Já tenho conta"}
       </button>
       <a className="docs-link" href="/api/docs/" target="_blank" rel="noreferrer">Documentação da API (Swagger)</a>
+      <a className="docs-link" href="/privacidade.html">Privacidade</a>
     </form>
   );
 }

@@ -24,6 +24,12 @@ Sistema pessoal de registro de ponto. Você bate o ponto, vê o espelho do mês 
   - rate limit em **todos** os endpoints, com 429 e `Retry-After`;
   - helmet, limite de tamanho do corpo da requisição e 404 em JSON;
   - o servidor não sobe se faltar variável de ambiente obrigatória.
+- **Pronto para publicar:**
+  - ícones (favicon, Apple, PWA), manifest, Open Graph 1200×630, JSON-LD, `robots.txt` (bloqueia `/api/`, libera o Swagger), sitemap e `llms.txt`;
+  - página de privacidade e 404 de verdade para caminhos que não existem;
+  - respostas comprimidas (gzip);
+  - Lighthouse: performance 99, acessibilidade 100, boas práticas 96 e SEO 100.
+- **Estatísticas só com consentimento (LGPD):** GA4 e Clarity carregam apenas depois de "Aceitar", e só se os IDs estiverem configurados. No Clarity, a área do espelho de ponto é mascarada (`data-clarity-mask`): nome e horários não vão para a gravação.
 
 ## Arquitetura
 
@@ -92,6 +98,8 @@ A imagem do `Dockerfile` da raiz junta tudo num serviço só: a API Express tamb
 3. Quando ele pedir `DATABASE_URL`, cole a string do Neon. O `JWT_SECRET` e a `TOTP_ENCRYPTION_KEY` são gerados sozinhos.
 4. Em alguns minutos o app sobe em `https://<nome>.onrender.com`. As tabelas são criadas na primeira subida.
 
+GA4 e Clarity (opcionais): no painel do Render, crie `VITE_GA_ID` e `VITE_CLARITY_ID` em **Environment** e faça um novo deploy. São IDs públicos que entram no build do front (o Dockerfile recebe como build args).
+
 > No plano grátis, o Render "dorme" depois de 15 minutos sem acesso. A primeira visita depois disso demora uns 30 segundos.
 
 ## Testes
@@ -99,7 +107,7 @@ A imagem do `Dockerfile` da raiz junta tudo num serviço só: a API Express tamb
 ```bash
 cd backend && npm test     # unitários (cálculo, XML, BrasilAPI com fetch falso, TOTP com os vetores da RFC 6238, criptografia)
 DATABASE_URL=postgres://ponto:ponto@localhost:5432/ponto npm test   # + integração da API
-cd frontend && npm test    # sessão (login com e sem 2FA, sessão vencida, logout), store e erros
+cd frontend && npm test    # sessão (login com e sem 2FA, sessão vencida, logout), store e erros + aviso de cookies
 ```
 
 Os testes de integração sobem o Express em memória contra um PostgreSQL real e cobrem:

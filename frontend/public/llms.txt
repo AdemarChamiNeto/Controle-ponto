@@ -1,0 +1,9 @@
+# Controle de Ponto
+
+> Sistema web de registro de ponto: batida em um clique, espelho mensal com horas trabalhadas, saldo, faltas e feriados nacionais (BrasilAPI), e exportação em CSV e XML. React + Redux Toolkit no front, Node/Express e PostgreSQL no back. Projeto de portfólio de Ademar Chami Neto.
+
+- [Aplicação](https://controle-ponto-jvo5.onrender.com/): crie uma conta para testar (os dados são seus; dá para apagar a marcação e sair).
+- [Documentação da API (Swagger)](https://controle-ponto-jvo5.onrender.com/api/docs/): todas as rotas, com "Try it out".
+- [Privacidade](https://controle-ponto-jvo5.onrender.com/privacidade.html)
+- [Código-fonte](https://github.com/AdemarChamiNeto/Controle-ponto)
+- [Portfólio do autor](https://ademarchamineto.github.io/)

@@ -1,0 +1,8 @@
+# Página pública: o login (raiz) e a documentação da API. O resto da API não é para indexar.
+User-agent: *
+Allow: /$
+Allow: /privacidade.html
+Allow: /api/docs/
+Disallow: /api/
+
+Sitemap: https://controle-ponto-jvo5.onrender.com/sitemap.xml

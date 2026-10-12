@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacidade — Controle de Ponto</title>
+    <meta name="description" content="Quais dados o Controle de Ponto guarda, onde ficam e como são protegidos." />
+    <link rel="canonical" href="https://controle-ponto-jvo5.onrender.com/privacidade.html" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#1f6feb" />
+    <style>
+      body { margin: 0; background: #f3f4f6; color: #1f2933; font: 16px/1.6 system-ui, sans-serif; }
+      main { max-width: 720px; margin: 0 auto; padding: 32px 20px 48px; }
+      h1 { font-size: 1.6rem; } h2 { font-size: 1.1rem; margin-top: 1.8em; }
+      a { color: #1f6feb; } button { font: inherit; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd2d9; background: #fff; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p><a href="/">← Voltar ao Controle de Ponto</a></p>
+      <h1>Privacidade</h1>
+      <p>O Controle de Ponto é um projeto de portfólio. Ele guarda só o necessário para funcionar.</p>
+
+      <h2>O que é guardado</h2>
+      <ul>
+        <li><strong>Conta:</strong> nome, email e a senha em forma de hash (bcrypt). A senha em si nunca é guardada.</li>
+        <li><strong>Marcações de ponto</strong> e a jornada diária que você configurar.</li>
+        <li><strong>Verificação em duas etapas</strong> (se você ativar): o segredo do app autenticador, criptografado, e os códigos de recuperação, só como hash.</li>
+      </ul>
+      <p>Os dados ficam num banco PostgreSQL hospedado no Neon (servidores nos Estados Unidos) e o app roda no Render. A conexão é sempre por HTTPS.</p>
+
+      <h2>Cookies</h2>
+      <ul>
+        <li><strong>Sessão (necessário):</strong> um cookie <code>httpOnly</code> que mantém você logado por 7 dias. Sem ele não dá para usar o sistema.</li>
+        <li><strong>Estatísticas (opcional):</strong> se aparecer um aviso de cookies, o site está configurado com o Google Analytics 4 e/ou o Microsoft Clarity. Eles só carregam se você clicar em <em>Aceitar</em>. Nome, email e o espelho de ponto não são enviados: a área do espelho fica mascarada no Clarity.</li>
+      </ul>
+      <p><button type="button" id="rever">Rever minha escolha de cookies</button> <span id="ok" role="status"></span></p>
+
+      <h2>Excluir os seus dados</h2>
+      <p>Você pode remover marcações a qualquer momento. O app ainda não tem um botão para excluir a conta inteira: para isso, peça pelo contato do <a href="https://ademarchamineto.github.io/">portfólio do autor</a> e a conta é apagada com todas as marcações.</p>
+    </main>
+    <script src="/privacidade.js"></script>
+  </body>
+</html>

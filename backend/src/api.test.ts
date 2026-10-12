@@ -259,3 +259,30 @@ test("logout apaga a sessão", { skip }, async () => {
   assert.equal(out.status, 204);
   assert.match(out.setCookies.join(), /ponto_session=;/);
 });
+
+test("serve o front na raiz, 404 de verdade nos outros caminhos e CSP com GA/Clarity", { skip }, async () => {
+  const fs = await import("node:fs");
+  const os = await import("node:os");
+  const path = await import("node:path");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "ponto-front-"));
+  fs.writeFileSync(path.join(dir, "index.html"), "<h1>app</h1>");
+  fs.writeFileSync(path.join(dir, "404.html"), "<h1>404</h1>");
+  fs.writeFileSync(path.join(dir, "robots.txt"), "User-agent: *");
+  const site = await appWithLimits({ STATIC_DIR: dir });
+  const origin = site.base.replace(/\/api$/, "");
+
+  const home = await fetch(origin + "/");
+  assert.equal(home.status, 200);
+  assert.match(await home.text(), /app/);
+  const csp = home.headers.get("content-security-policy") ?? "";
+  assert.match(csp, /script-src 'self' https:\/\/www\.googletagmanager\.com/);
+  assert.match(csp, /https:\/\/\*\.clarity\.ms/);
+
+  assert.equal((await fetch(origin + "/robots.txt")).status, 200);
+  const missing = await fetch(origin + "/nao-existe");
+  assert.equal(missing.status, 404);
+  assert.match(await missing.text(), /404/);
+  assert.equal((await call("/nao-existe", { base: site.base })).json.error, "Rota não encontrada", "na /api continua JSON");
+  site.server.close();
+  fs.rmSync(dir, { recursive: true });
+});
