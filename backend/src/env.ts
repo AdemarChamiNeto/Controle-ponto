@@ -13,7 +13,7 @@ const schema = z.object({
   DATABASE_URL: z.string().min(1, "defina DATABASE_URL"),
   JWT_SECRET: z.string().min(16, "JWT_SECRET ausente ou curto (mínimo 16 caracteres)"),
   TOTP_ENCRYPTION_KEY: z
-    .string({ required_error: "defina TOTP_ENCRYPTION_KEY (gere com: openssl rand -hex 32)" })
+    .string({ error: (i) => (i.input === undefined ? "defina TOTP_ENCRYPTION_KEY (gere com: openssl rand -hex 32)" : undefined) })
     .refine((s) => decodeKey(s) !== null, "TOTP_ENCRYPTION_KEY deve ter 32 bytes: 64 caracteres hex (openssl rand -hex 32) ou base64 (o generateValue do Render)"),
   NODE_ENV: z.string().default("development"),
 });
